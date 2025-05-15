@@ -1,0 +1,38 @@
+[project]
+# Define the project name.
+name = "talk-to-your-pdf"
+# Define the project version.
+version = "0.0.1"
+# Support Python 3.10+.
+requires-python = ">=3.11"
+
+[tool.ruff]
+# Set the maximum line length to 80.
+line-length = 75
+indent-width = 1 # we use indent tab so only one
+# always generate python 3.11 compatible code
+target-version = "py311"
+
+[tool.ruff.lint]
+# Add the `line-too-long` rule to the enforced rule set.
+extend-select = ["E501"]
+# Skip unused variable rules (`F841`).
+ignore = ["F841"]
+
+[tool.ruff.format]
+# Use tab instead of space indentation. (default space)
+indent-style = "tab"
+# Enable reformatting of code snippets in docstrings.
+docstring-code-format = true
+# Format all docstring code snippets with a line length of 70.
+docstring-code-line-length = 70
+# Prefer double quotes over single quotes. (default double)
+quote-style = "double"
+skip-magic-trailing-comma = true
+
+[tool.ruff.lint.isort]
+combine-as-imports = false
+force-single-line = true
+from-first = false
+# Use two lines after each import block.
+lines-after-imports = 2

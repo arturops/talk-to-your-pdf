@@ -1,15 +1,15 @@
 from typing import Any
 from typing import List
 
-import ollama
+import pdfplumber
 import requests
 import streamlit as st
 
 
-# page layout
+# page setup
 st.set_page_config(
-	page_title="PDF RAG",
-	page_icon="📄",
+	page_title="Tame your PDF",
+	page_icon="🦮",
 	layout="wide",
 	initial_sidebar_state="collapsed",
 )
@@ -39,8 +39,8 @@ def extract_all_pages_as_images(file_uploaded) -> List[Any]:
 	"""
 	# logger.info(f"Extracting all pages as images from file: {file_upload.name}")
 	pdf_pages = []
-	# with pdfplumber.open(file_uploaded) as pdf:
-	#     pdf_pages = [page.to_image().original for page in pdf.pages]
+	with pdfplumber.open(file_uploaded) as pdf:
+		pdf_pages = [page.to_image().original for page in pdf.pages]
 	# logger.info("PDF pages extracted as images")
 	return pdf_pages
 
@@ -61,7 +61,7 @@ def clean_session():
 			# logger.info(f"Cleaned '{key}' value: {value}"")
 		st.success("Collection and temporary files deleted successfully.")
 		# logger.info("Session state cleaned")
-		st.rerun()
+		# st.rerun()
 	except Exception as e:
 		st.error(f"Error cleaning session state: {str(e)}")
 		# logger.error(f"Error cleaning session state: {str(e)}")
@@ -77,47 +77,40 @@ def enable_process_pdf_button(file_uploaded) -> bool:
 
 def main():
 	"""Run the client"""
-	st.subheader(
-		"📜🔍 Talk privately to your PDF 🙂🤖", divider="gray", anchor=False
-	)
+	st.subheader("📜🔍 Talk to your PDF 🙂🤖", divider="gray", anchor=False)
 
 	# list local models
-	ollama_models = ollama.list()
-	print(ollama_models)
-	ollama_models_items = tuple()
+	response = requests.get("http://localhost:8000/list/models")
+	models = response.json()["models"]
+	# logger.info(f"Models available: {models}")
 
 	# setup layout
-
 	col1, col2 = st.columns([1.5, 2])
 
 	# Init session state
-	keys = {
-		"messages",
-		"pdf_pages",
-		"vector_db",
-		"pdf_process_button_disabled",
+	init_states_dict = {
+		"messages": [],
+		"pdf_pages": [],
+		"vector_db": None,
+		"pdf_process_button_disabled": True,
 	}
-	for key in keys:
+	for key, deafult_value in init_states_dict.items():
 		if key not in st.session_state:
-			st.session_state[key] = None
+			st.session_state[key] = deafult_value
 	# logger.info("Session state initialized")
 
 	# Upload file
+	# with col1, st.container(height=None, border=False):
+	col1.subheader("1️⃣ Upload a PDF ↓")
+
 	file_uploaded = col1.file_uploader(
-		"Upload a PDF file",
-		type="pdf",
+		"1️⃣ Upload a PDF ↓",
+		type=["pdf"],
 		accept_multiple_files=False,
 		key="pdf_uploader",
+		help="Upload a PDF file to ask questions about it",
 		# on_change=enable_process_pdf_button,
-		# label_visibility="collapsed",
-	)
-
-	pdf_proccess_button = col1.button(
-		"Process",
-		key="process_pdf_button",
-		help="Process pdf to get it ready for querying",
-		use_container_width=True,
-		disable=st.session_state["pdf_process_button_disabled"],
+		label_visibility="collapsed",
 	)
 
 	# logger.info("File uploaded")
@@ -126,7 +119,11 @@ def main():
 			st.session_state["pdf_pages"] = extract_all_pages_as_images(
 				file_uploaded
 			)
-		st.session_state["pdf_process_button_disabled"] = True
+	else:
+		st.session_state["pdf_pages"] = None
+		with col1, st.container(height=None, border=True):
+			st.write("*No file uploaded*")
+
 	# else:
 	# 	st.write("No file uploaded.")
 
@@ -142,7 +139,21 @@ def main():
 		with col1, st.container(height=400, border=True):
 			st.subheader("PDF pages preview")
 			for page in st.session_state["pdf_pages"]:
-				st.image(page, use_column_width=True)
+				st.image(page, use_container_width=True)
+
+	if file_uploaded:
+		st.session_state["pdf_process_button_disabled"] = False
+	else:
+		st.session_state["pdf_process_button_disabled"] = True
+
+	pdf_proccess_button = col1.button(
+		"Start talking to PDF",
+		icon="🗣️",
+		key="process_pdf_button",
+		help="Process pdf to get it ready for querying",
+		use_container_width=True,
+		disabled=st.session_state["pdf_process_button_disabled"],
+	)
 
 	if pdf_proccess_button:
 		# logger.info("File submited to get processed")
@@ -157,19 +168,18 @@ def main():
 			st.session_state["vector_db"] = create_vdb(file_uploaded)
 
 			# logger.info("PDF stored and processed successfully")
-			st.session_state["pdf_process_button_disabled"] = False
+			st.session_state["pdf_process_button_disabled"] = True
 
 	# Delete all button (refresh)
-	restart_all = col1.button(
-		label="🚮 Restart all",
+	st.button(
+		icon="🚮",
+		label="Restart all",
 		type="secondary",
 		key="restart_all",
 		help="Deletes pdf and all associated data to start over",
 		use_container_width=True,
+		on_click=clean_session,
 	)
-
-	if restart_all:
-		clean_session()
 
 
 if __name__ == "__main__":

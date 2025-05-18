@@ -181,6 +181,61 @@ def main():
 		on_click=clean_session,
 	)
 
+	# Chat interface
+	with col2:
+		col2.subheader("3️⃣ Pick a model available locally on your system ↓")
+		selected_model = col2.selectbox(
+			"3️⃣ Pick a model available locally on your system ↓",
+			models,
+			key="model_select",
+			label_visibility="collapsed",
+		)
+
+		message_container = st.container(height=500, border=True)
+
+		# Display chat history
+		for i, message in enumerate(st.session_state["messages"]):
+			avatar = "🤖" if message["role"] == "assistant" else "🤓"
+			with message_container.chat_message(message["role"], avatar=avatar):
+				st.markdown(message["content"])
+
+		# Chat input and processing
+		if prompt := st.chat_input("Enter a prompt here...", key="chat_input"):
+			try:
+				# Add user message to chat
+				st.session_state["messages"].append(
+					{"role": "user", "content": prompt}
+				)
+				with message_container.chat_message("user", avatar="🤓"):
+					st.markdown(prompt)
+
+				# Process and display assistant response
+				with message_container.chat_message("assistant", avatar="🤖"):
+					with st.spinner(":green[processing...]"):
+						if st.session_state["vector_db"] is not None:
+							# response = process_question(
+							# 		prompt, st.session_state["vector_db"], selected_model
+							# )
+							response = f"**A response** right!!! {selected_model}\n"
+							st.markdown(response)
+						else:
+							st.warning("Please upload a PDF file first.")
+
+				# Add assistant response to chat history
+				if st.session_state["vector_db"] is not None:
+					st.session_state["messages"].append(
+						{"role": "assistant", "content": response}
+					)
+
+			except Exception as e:
+				st.error(e, icon="😵")
+				# logger.error(f"Error processing prompt: {e}")
+		else:
+			if st.session_state["vector_db"] is None:
+				st.warning(
+					"Upload a PDF file or use the sample PDF to begin chat..."
+				)
+
 
 if __name__ == "__main__":
 	# run the app

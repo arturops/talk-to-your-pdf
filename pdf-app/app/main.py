@@ -91,9 +91,36 @@ async def file_upload_controller(
 	}
 
 
-@app.post("/retrieve/pdf/pages")
-def retrieve_pdf_pages_controller():
+@app.get("/download/vectorDatabase")
+def download_vector_db_controller():
 	return
+
+
+def delete_folder(folder: str):
+	"""
+	Deletes a folder and all its contents.
+
+	Args:
+	    folder (str): The folder to delete.
+	"""
+	folder_path = os.path.abspath(folder)
+	if os.path.exists(folder_path):
+		shutil.rmtree(folder_path)
+		logger.info(
+			f"Folder '{folder_path}' and its contents have been deleted."
+		)
+	else:
+		logger.info(f"Folder '{folder_path}' does not exist.")
+
+
+@app.delete("/vectorDatabase", status_code=204)
+def delete_vector_db_controller():
+	delete_folder(VECTOR_DB_DIR)
+
+
+@app.delete("/pdf", status_code=204)
+def delete_pdf_controller():
+	delete_folder(UPLOADED_DOCS_DIR)
 
 
 def get_ollama_model_names(models_info: Any) -> Tuple[str, ...]:

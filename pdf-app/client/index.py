@@ -47,7 +47,7 @@ def extract_all_pages_as_images(file_uploaded) -> List[Any]:
 
 def create_vdb(file_uploaded) -> Any:
 	"""Calls backend to create a vector database"""
-	return None
+	return 1
 
 
 def clean_session():
@@ -56,6 +56,10 @@ def clean_session():
 	"""
 	# logger.info("Cleaning session state")
 	try:
+		res = requests.delete("http://localhost:8000/vectorDatabase")
+		res.raise_for_status()
+		res = requests.delete("http://localhost:8000/pdf")
+		res.raise_for_status()
 		for key in st.session_state.keys():
 			value = st.session_state.pop(key, None)
 			# logger.info(f"Cleaned '{key}' value: {value}"")
@@ -79,11 +83,6 @@ def main():
 	"""Run the client"""
 	st.subheader("📜🔍 Talk to your PDF 🙂🤖", divider="gray", anchor=False)
 
-	# list local models
-	response = requests.get("http://localhost:8000/list/models")
-	models = response.json()["models"]
-	# logger.info(f"Models available: {models}")
-
 	# setup layout
 	col1, col2 = st.columns([1.5, 2])
 
@@ -94,9 +93,9 @@ def main():
 		"vector_db": None,
 		"pdf_process_button_disabled": True,
 	}
-	for key, deafult_value in init_states_dict.items():
+	for key, default_value in init_states_dict.items():
 		if key not in st.session_state:
-			st.session_state[key] = deafult_value
+			st.session_state[key] = default_value
 	# logger.info("Session state initialized")
 
 	# Upload file
@@ -141,6 +140,13 @@ def main():
 			for page in st.session_state["pdf_pages"]:
 				st.image(page, use_container_width=True)
 
+	# list local models
+	models = tuple()
+	if st.session_state.get("pdf_pages"):
+		response = requests.get("http://localhost:8000/list/models")
+		models = response.json()["models"]
+		# logger.info(f"Models available: {models}")
+
 	if file_uploaded:
 		st.session_state["pdf_process_button_disabled"] = False
 	else:
@@ -157,7 +163,7 @@ def main():
 
 	if pdf_proccess_button:
 		# logger.info("File submited to get processed")
-		with st.spinner("⚙️ Processing PDF ..."):
+		with st.spinner(":green[processing PDF...]"):
 			# logger.info("Storing PDF")
 			files = {
 				"file": (file_uploaded.name, file_uploaded, file_uploaded.type)
@@ -200,7 +206,11 @@ def main():
 				st.markdown(message["content"])
 
 		# Chat input and processing
-		if prompt := st.chat_input("Enter a prompt here...", key="chat_input"):
+		if prompt := st.chat_input(
+			"Enter a prompt here...",
+			key="chat_input",
+			disabled=st.session_state["vector_db"] != 1,
+		):
 			try:
 				# Add user message to chat
 				st.session_state["messages"].append(
@@ -213,18 +223,20 @@ def main():
 				with message_container.chat_message("assistant", avatar="🤖"):
 					with st.spinner(":green[processing...]"):
 						if st.session_state["vector_db"] is not None:
-							# response = process_question(
-							# 		prompt, st.session_state["vector_db"], selected_model
-							# )
-							response = f"**A response** right!!! {selected_model}\n"
-							st.markdown(response)
+							response = requests.post(
+								"http://localhost:8000/question",
+								json={"prompt": prompt, "model": selected_model},
+							)
+							response_json = response.json()
+							response_data = response_json["response"]
+							st.markdown(response_data)
 						else:
 							st.warning("Please upload a PDF file first.")
 
 				# Add assistant response to chat history
 				if st.session_state["vector_db"] is not None:
 					st.session_state["messages"].append(
-						{"role": "assistant", "content": response}
+						{"role": "assistant", "content": response_data}
 					)
 
 			except Exception as e:

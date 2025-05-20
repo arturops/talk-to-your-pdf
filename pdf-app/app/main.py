@@ -151,3 +151,34 @@ def list_models_controller():
 	models_info = ollama.list()
 	ollama_models = get_ollama_model_names(models_info)
 	return {"models": ollama_models}
+
+
+class QuestionRequest(BaseModel):
+	"""
+	Request model for the question endpoint.
+	"""
+
+	prompt: str
+	model: str = "llama3.2:3b"
+
+
+@app.post("/question")
+def question_controller(question_request: QuestionRequest):
+	"""
+	Ask a question to the model.
+	"""
+	logger.info(
+		f"Received question: '{question_request.prompt}' for model: {question_request.model}"
+	)
+	try:
+		response = process_question(
+			question=question_request.prompt,
+			selected_model=question_request.model,
+		)
+	except Exception as e:
+		logger.error(f"Error asking question: {e}")
+		raise HTTPException(
+			status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+			detail=f"An error occurred while asking the question: {str(e)}",
+		)
+	return {"response": response}

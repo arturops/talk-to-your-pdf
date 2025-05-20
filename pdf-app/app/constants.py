@@ -1,0 +1,3 @@
+DEFAULT_CHUNK_SIZE = 1024 * 1024 * 50  # MB
+VECTOR_DB_DIR = "vector_database"
+UPLOADED_DOCS_DIR = "uploads"

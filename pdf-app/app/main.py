@@ -3,28 +3,36 @@
 # fast api (backend API)
 # LangChain, Ollama, pdfplumber
 # llama3.2 and nomic models
-import logging
+import os
+import shutil
 from typing import Annotated
 from typing import Any
 from typing import Tuple
 
 import ollama
+from fastapi import BackgroundTasks
 from fastapi import FastAPI
 from fastapi import File
 from fastapi import HTTPException
 from fastapi import UploadFile
 from fastapi import status
-from upload import save_file
+from langchain_community.document_loaders import UnstructuredPDFLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from loguru import logger
+from pydantic import BaseModel
+
+from app.constants import UPLOADED_DOCS_DIR
+from app.constants import VECTOR_DB_DIR
+from app.retriever import process_question
+from app.upload import save_file
+from app.vector_db import VectorDatabaseService
 
 
-# Logging configuration
-logging.basicConfig(
-	level=logging.INFO,
-	format="%(asctime)s - %(levelname)s - %(message)s",
-	datefmt="%Y-%m-%d %H:%M:%S",
-)
-
-logger = logging.getLogger(__name__)
+# This is a workaround for the duplicate liomp.dylib in macOS
+# torch installs its own version of libomp.dylib
+# and it conflicts with the one used by faiss-cpu
+# We nedd to allow both to coexist
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 app = FastAPI()
 

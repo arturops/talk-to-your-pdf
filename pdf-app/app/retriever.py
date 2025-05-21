@@ -11,7 +11,8 @@ from app.vector_db import VectorDatabaseService
 
 def process_question(question: str, selected_model: str) -> str:
 	"""
-	Process a user question using the vector database and selected language model.
+	Process a user question using the vector database and selected language
+	model.
 
 	Args:
 	    question (str): The user's question.
@@ -41,9 +42,8 @@ def process_question(question: str, selected_model: str) -> str:
 	# Set up retriever
 	vector_db = VectorDatabaseService().load_vector_db()
 	retriever = MultiQueryRetriever.from_llm(
-		vector_db.as_retriever(), llm, prompt=QUERY_PROMPT
+		vector_db.as_retriever(k=10), llm, prompt=QUERY_PROMPT
 	)
-	logger.info(f"Retriever got: {retriever}")
 
 	# RAG prompt template
 	template = """Answer the question based ONLY on the following context:
@@ -51,17 +51,15 @@ def process_question(question: str, selected_model: str) -> str:
     Question: {question}
   """
 
-	prompt = ChatPromptTemplate.from_template(template)
-	logger.info(f"RAG Prompt: {prompt}")
+	rag_prompt = ChatPromptTemplate.from_template(template)
 
 	# Create chain
 	chain = (
 		{"context": retriever, "question": RunnablePassthrough()}
-		| prompt
+		| rag_prompt
 		| llm
 		| StrOutputParser()
 	)
-	logger.info(f"Created chain: {chain}")
 
 	response = chain.invoke(question)
 	logger.info("Question processed and response generated")

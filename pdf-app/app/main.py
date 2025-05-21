@@ -1,8 +1,3 @@
-# Tech stack is FAISS (vdb)
-# streamlit (UI)
-# fast api (backend API)
-# LangChain, Ollama, pdfplumber
-# llama3.2 and nomic models
 import os
 import shutil
 from typing import Annotated
@@ -16,14 +11,13 @@ from fastapi import File
 from fastapi import HTTPException
 from fastapi import UploadFile
 from fastapi import status
-from langchain_community.document_loaders import UnstructuredPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 from loguru import logger
 from pydantic import BaseModel
 
 from app.constants import UPLOADED_DOCS_DIR
 from app.constants import VECTOR_DB_DIR
 from app.retriever import process_question
+from app.upload import pdf_text_extractor
 from app.upload import save_file
 from app.vector_db import VectorDatabaseService
 
@@ -39,20 +33,7 @@ app = FastAPI()
 
 @app.get("/")
 def root_controller():
-	return {"message": "Hello World"}
-
-
-def pdf_text_extractor(filepath: str) -> None:
-	loader = UnstructuredPDFLoader(file_path=filepath)
-	data = loader.load()
-	text_splitter = RecursiveCharacterTextSplitter(
-		chunk_size=8000, chunk_overlap=150
-	)
-	chunks = text_splitter.split_documents(data)
-	print
-	with open(filepath.replace("pdf", "txt"), "w", encoding="utf-8") as f:
-		chunks_str = ",".join([chunk.page_content for chunk in chunks])
-		f.write(chunks_str)
+	return {"message": "The app is running!"}
 
 
 @app.post("/upload")
@@ -70,13 +51,19 @@ async def file_upload_controller(
 		)
 
 	try:
+		vdb_chunk_size = 8000
 		file_path = await save_file(file)
-		background_task_processor.add_task(pdf_text_extractor, file_path)
+		background_task_processor.add_task(
+			pdf_text_extractor,
+			file_path,
+			chunk_size=vdb_chunk_size,
+			chunk_overlap=150,
+		)
 		vector_db_serv = VectorDatabaseService()
 		background_task_processor.add_task(
 			vector_db_serv.store_file_content_in_db,
 			file_path.replace("pdf", "txt"),
-			chunk_size=8000,
+			chunk_size=vdb_chunk_size,
 			collection_name=VECTOR_DB_DIR,
 		)
 	except Exception as e:

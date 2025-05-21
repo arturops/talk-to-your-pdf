@@ -12,16 +12,16 @@ class VectorDatabaseService:
 	async def store_file_content_in_db(
 		self,
 		filepath: str,
-		chunk_size: int = 512,
+		chunk_size: int = 8000,
 		collection_name: str = VECTOR_DB_DIR,
 	) -> None:
-		logger.info(f"Inserting {filepath} content into database")
+		logger.info(f"Inserting {filepath} content into vector database")
 		vectordb = None
 		ollama_embeddings = OllamaEmbeddingsService(
 			model_name="nomic-embed-text:latest"
 		)
 		async for chunk in load(filepath, chunk_size):
-			logger.info(f"Inserting '{chunk[0:20]}...' into database")
+			# logger.info(f"Inserting '{chunk[0:20]}...' into database")
 			# prepare docs
 			docs = [Document(page_content=chunk)]
 			if vectordb is None:

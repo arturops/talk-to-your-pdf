@@ -4,6 +4,7 @@ from typing import List
 import pdfplumber
 import requests
 import streamlit as st
+from loguru import logger
 
 
 # page setup
@@ -14,17 +15,6 @@ st.set_page_config(
 	initial_sidebar_state="collapsed",
 )
 
-# st.write("Upload a file to FastAPI")
-# file = st.file_uploader("Choose a PDF file", type=["pdf"])
-
-# if st.button("Submit"):
-# 	if file is not None:
-# 		files = {"file": (file.name, file, file.type)}
-# 		response = requests.post("http://localhost:8000/upload", files=files)
-# 		st.write(response.text)
-# 	else:
-# 		st.wrtite("No file uploaded.")
-
 
 @st.cache_data
 def extract_all_pages_as_images(file_uploaded) -> List[Any]:
@@ -32,29 +22,27 @@ def extract_all_pages_as_images(file_uploaded) -> List[Any]:
 	Extract all pages from a PDF file as images.
 
 	Args:
-	    file_upload (st.UploadedFile): Streamlit file upload object containing the PDF.
+	    file_upload (st.UploadedFile): Streamlit file upload object
+			containing the PDF.
 
 	Returns:
 	    List[Any]: A list of image objects representing each page of the PDF.
 	"""
-	# logger.info(f"Extracting all pages as images from file: {file_upload.name}")
+	logger.info(
+		f"Extracting all pages as images from file: {file_uploaded.name}"
+	)
 	pdf_pages = []
 	with pdfplumber.open(file_uploaded) as pdf:
 		pdf_pages = [page.to_image().original for page in pdf.pages]
-	# logger.info("PDF pages extracted as images")
+	logger.info("PDF pages extracted as images")
 	return pdf_pages
-
-
-def create_vdb(file_uploaded) -> Any:
-	"""Calls backend to create a vector database"""
-	return 1
 
 
 def clean_session():
 	"""
 	Clean the session state.
 	"""
-	# logger.info("Cleaning session state")
+	logger.info("Cleaning session state")
 	try:
 		res = requests.delete("http://localhost:8000/vectorDatabase")
 		res.raise_for_status()
@@ -62,13 +50,12 @@ def clean_session():
 		res.raise_for_status()
 		for key in st.session_state.keys():
 			value = st.session_state.pop(key, None)
-			# logger.info(f"Cleaned '{key}' value: {value}"")
-		st.success("Collection and temporary files deleted successfully.")
-		# logger.info("Session state cleaned")
-		# st.rerun()
+			# logger.info(f"Cleaned '{key}' value: {value}")
+		st.success("App restarted and files deleted successfully.")
+		logger.info("Session state cleaned")
 	except Exception as e:
-		st.error(f"Error cleaning session state: {str(e)}")
-		# logger.error(f"Error cleaning session state: {str(e)}")
+		st.error("Error cleaning up the app")
+		logger.error(f"Error cleaning session state: {str(e)}")
 
 
 def enable_process_pdf_button(file_uploaded) -> bool:
@@ -90,16 +77,16 @@ def main():
 	init_states_dict = {
 		"messages": [],
 		"pdf_pages": [],
-		"vector_db": None,
+		"vector_db_ready": False,
 		"pdf_process_button_disabled": True,
+		"is_model_selected": False,
 	}
 	for key, default_value in init_states_dict.items():
 		if key not in st.session_state:
 			st.session_state[key] = default_value
-	# logger.info("Session state initialized")
+	logger.info("Session state initialized")
 
 	# Upload file
-	# with col1, st.container(height=None, border=False):
 	col1.subheader("1️⃣ Upload a PDF ↓")
 
 	file_uploaded = col1.file_uploader(
@@ -113,8 +100,9 @@ def main():
 	)
 
 	# logger.info("File uploaded")
+	col1.subheader("PDF pages preview")
 	if file_uploaded:
-		with st.spinner("Generating preview of PDF ..."):
+		with st.spinner(":green[Generating PDF preview ...]"):
 			st.session_state["pdf_pages"] = extract_all_pages_as_images(
 				file_uploaded
 			)
@@ -123,20 +111,9 @@ def main():
 		with col1, st.container(height=None, border=True):
 			st.write("*No file uploaded*")
 
-	# else:
-	# 	st.write("No file uploaded.")
-
-	# if file_uploaded:
-	# 	with st.spinner("⚙️ Processing PDF ..."):
-	# 		st.session_state["vector_db"] = create_vdb(file_uploaded)
-	# 		st.session_state["pdf_pages"] = extract_all_pages_as_images(
-	# 			file_uploaded
-	# 		)
-
 	# Display PDF pages
 	if st.session_state.get("pdf_pages"):
 		with col1, st.container(height=400, border=True):
-			st.subheader("PDF pages preview")
 			for page in st.session_state["pdf_pages"]:
 				st.image(page, use_container_width=True)
 
@@ -145,35 +122,34 @@ def main():
 	if st.session_state.get("pdf_pages"):
 		response = requests.get("http://localhost:8000/list/models")
 		models = response.json()["models"]
-		# logger.info(f"Models available: {models}")
 
 	if file_uploaded:
 		st.session_state["pdf_process_button_disabled"] = False
 	else:
 		st.session_state["pdf_process_button_disabled"] = True
 
+	col1.subheader("2️⃣ Prepare PDF for chat ↓")
 	pdf_proccess_button = col1.button(
 		"Start talking to PDF",
 		icon="🗣️",
 		key="process_pdf_button",
-		help="Process pdf to get it ready for querying",
+		help="Process pdf to get it ready for the chat",
 		use_container_width=True,
 		disabled=st.session_state["pdf_process_button_disabled"],
 	)
 
 	if pdf_proccess_button:
-		# logger.info("File submited to get processed")
+		logger.info("File submited to create vector database")
 		with st.spinner(":green[processing PDF...]"):
-			# logger.info("Storing PDF")
 			files = {
 				"file": (file_uploaded.name, file_uploaded, file_uploaded.type)
 			}
 			response = requests.post("http://localhost:8000/upload", files=files)
-			st.write(response.text)
-			# logger.info("Generating PDF embeddings and storing them in vdb")
-			st.session_state["vector_db"] = create_vdb(file_uploaded)
+			st.write(response, response.text)
+			logger.info("Generating PDF embeddings and storing them in vdb")
+			st.session_state["vector_db_ready"] = True
 
-			# logger.info("PDF stored and processed successfully")
+			logger.info("PDF stored and processed successfully")
 			st.session_state["pdf_process_button_disabled"] = True
 
 	# Delete all button (refresh)
@@ -209,7 +185,7 @@ def main():
 		if prompt := st.chat_input(
 			"Enter a prompt here...",
 			key="chat_input",
-			disabled=st.session_state["vector_db"] != 1,
+			disabled=st.session_state["vector_db_ready"] != 1,
 		):
 			try:
 				# Add user message to chat
@@ -222,31 +198,40 @@ def main():
 				# Process and display assistant response
 				with message_container.chat_message("assistant", avatar="🤖"):
 					with st.spinner(":green[processing...]"):
-						if st.session_state["vector_db"] is not None:
-							response = requests.post(
-								"http://localhost:8000/question",
-								json={"prompt": prompt, "model": selected_model},
-							)
-							response_json = response.json()
-							response_data = response_json["response"]
-							st.markdown(response_data)
-						else:
-							st.warning("Please upload a PDF file first.")
+						if st.session_state["vector_db_ready"] is not None:
+							try:
+								response = requests.post(
+									"http://localhost:8000/question",
+									json={"prompt": prompt, "model": selected_model},
+								)
+								response.raise_for_status()
+								response_json = response.json()
+								response_data = response_json["response"]
+								st.markdown(response_data)
+							except requests.exceptions.HTTPError as e:
+								logger.error(f"HTTP error: {e}")
+								if selected_model is None:
+									st.error(
+										"😵 Error processing the request. "
+										"Don't forget to select a model."
+									)
+								else:
+									st.error(
+										"😵 Error processing the request. Please try again."
+									)
+								response_data = None
 
 				# Add assistant response to chat history
-				if st.session_state["vector_db"] is not None:
+				if (
+					st.session_state["vector_db_ready"] is not None and response_data
+				):
 					st.session_state["messages"].append(
 						{"role": "assistant", "content": response_data}
 					)
 
 			except Exception as e:
-				st.error(e, icon="😵")
-				# logger.error(f"Error processing prompt: {e}")
-		else:
-			if st.session_state["vector_db"] is None:
-				st.warning(
-					"Upload a PDF file or use the sample PDF to begin chat..."
-				)
+				st.error(f"Error processing prompt:\n*{e}*", icon="😵")
+				logger.error(f"Error processing prompt: {e}")
 
 
 if __name__ == "__main__":

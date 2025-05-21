@@ -71,7 +71,7 @@ def main():
 	st.subheader("📜🔍 Talk to your PDF 🙂🤖", divider="gray", anchor=False)
 
 	# setup layout
-	col1, col2 = st.columns([1.5, 2])
+	col1, col2 = st.columns([1.8, 2])
 
 	# Init session state
 	init_states_dict = {
@@ -173,7 +173,7 @@ def main():
 			label_visibility="collapsed",
 		)
 
-		message_container = st.container(height=500, border=True)
+		message_container = st.container(height=650, border=True)
 
 		# Display chat history
 		for i, message in enumerate(st.session_state["messages"]):

@@ -9,7 +9,7 @@ from loguru import logger
 
 # page setup
 st.set_page_config(
-	page_title="Tame your PDF",
+	page_title="Tame Your PDF",
 	page_icon="🦮",
 	layout="wide",
 	initial_sidebar_state="collapsed",
@@ -51,7 +51,7 @@ def clean_session():
 		for key in st.session_state.keys():
 			value = st.session_state.pop(key, None)
 			# logger.info(f"Cleaned '{key}' value: {value}")
-		st.success("App restarted and files deleted successfully.")
+		# st.success("Restarted successfully.")
 		logger.info("Session state cleaned")
 	except Exception as e:
 		st.error("Error cleaning up the app")
@@ -68,10 +68,7 @@ def enable_process_pdf_button(file_uploaded) -> bool:
 
 def main():
 	"""Run the client"""
-	st.subheader("📜🔍 Talk to your PDF 🙂🤖", divider="gray", anchor=False)
-
-	# setup layout
-	col1, col2 = st.columns([1.8, 2])
+	st.header("🦮 :blue[Tame Your PDF] 🙂🤖", divider="blue", anchor=False)
 
 	# Init session state
 	init_states_dict = {
@@ -87,10 +84,10 @@ def main():
 	logger.info("Session state initialized")
 
 	# Upload file
-	col1.subheader("1️⃣ Upload a PDF ↓")
+	st.subheader("1️⃣ Upload PDF")
 
-	file_uploaded = col1.file_uploader(
-		"1️⃣ Upload a PDF ↓",
+	file_uploaded = st.file_uploader(
+		"1️⃣ Upload PDF",
 		type=["pdf"],
 		accept_multiple_files=False,
 		key="pdf_uploader",
@@ -99,8 +96,27 @@ def main():
 		label_visibility="collapsed",
 	)
 
+	if file_uploaded:
+		st.session_state["pdf_process_button_disabled"] = False
+	else:
+		st.session_state["pdf_process_button_disabled"] = True
+
+	# setup layout
+	col1, col2 = st.columns([1.8, 2])
+
+	col1.subheader("2️⃣ Prepare PDF for Chat")
+	pdf_proccess_button = col1.button(
+		"Submit PDF",
+		icon="📲",
+		type="secondary",
+		key="process_pdf_button",
+		help="Process pdf to get it ready for the chat",
+		use_container_width=True,
+		disabled=st.session_state["pdf_process_button_disabled"],
+	)
+
 	# logger.info("File uploaded")
-	col1.subheader("PDF pages preview")
+	col1.subheader("PDF Preview")
 	if file_uploaded:
 		with st.spinner(":green[Generating PDF preview ...]"):
 			st.session_state["pdf_pages"] = extract_all_pages_as_images(
@@ -123,21 +139,6 @@ def main():
 		response = requests.get("http://localhost:8000/list/models")
 		models = response.json()["models"]
 
-	if file_uploaded:
-		st.session_state["pdf_process_button_disabled"] = False
-	else:
-		st.session_state["pdf_process_button_disabled"] = True
-
-	col1.subheader("2️⃣ Prepare PDF for chat ↓")
-	pdf_proccess_button = col1.button(
-		"Start talking to PDF",
-		icon="🗣️",
-		key="process_pdf_button",
-		help="Process pdf to get it ready for the chat",
-		use_container_width=True,
-		disabled=st.session_state["pdf_process_button_disabled"],
-	)
-
 	if pdf_proccess_button:
 		logger.info("File submited to create vector database")
 		with st.spinner(":green[processing PDF...]"):
@@ -154,10 +155,10 @@ def main():
 
 	# Delete all button (refresh)
 	st.button(
-		icon="🚮",
-		label="Restart all",
+		icon="🔥",
+		label="Delete All",
 		type="secondary",
-		key="restart_all",
+		key="delete_all",
 		help="Deletes pdf and all associated data to start over",
 		use_container_width=True,
 		on_click=clean_session,
@@ -165,15 +166,15 @@ def main():
 
 	# Chat interface
 	with col2:
-		col2.subheader("3️⃣ Pick a model available locally on your system ↓")
+		col2.subheader("3️⃣ Pick a Model")
 		selected_model = col2.selectbox(
-			"3️⃣ Pick a model available locally on your system ↓",
+			"3️⃣ Pick a Model",
 			models,
 			key="model_select",
 			label_visibility="collapsed",
 		)
-
-		message_container = st.container(height=650, border=True)
+		col2.subheader("Chat")
+		message_container = st.container(height=400, border=True)
 
 		# Display chat history
 		for i, message in enumerate(st.session_state["messages"]):

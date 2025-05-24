@@ -1,3 +1,5 @@
+import os
+
 from langchain_ollama import OllamaEmbeddings
 
 
@@ -14,9 +16,12 @@ class EmbeddingsService:
 
 
 class OllamaEmbeddingsService(EmbeddingsService):
-	def __init__(self, model_name: str = "nomic-embed-text:latest"):
+	def __init__(self, model_name: str):
 		super().__init__(model_name)
-		self.model = OllamaEmbeddings(model=model_name)
+		self.base_url = os.getenv(
+			"OLLAMA_SERVER_URL", "http://localhost:11434"
+		)
+		self.model = OllamaEmbeddings(base_url=self.base_url, model=model_name)
 
 	def get_embeddings(self, docs_list: list[str]):
 		embeddings = self.model.embed_documents(docs_list)

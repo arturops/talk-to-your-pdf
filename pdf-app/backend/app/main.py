@@ -28,6 +28,11 @@ from app.vector_db import VectorDatabaseService
 # We nedd to allow both to coexist
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
+OLLAMA_SERVER_URL = os.getenv(
+	"OLLAMA_SERVER_URL", "http://localhost:11434"
+)
+
+
 app = FastAPI()
 
 
@@ -135,7 +140,8 @@ def get_ollama_model_names(models_info: Any) -> Tuple[str, ...]:
 
 @app.get("/list/models")
 def list_models_controller():
-	models_info = ollama.list()
+	ollama_client = ollama.Client(host=OLLAMA_SERVER_URL)
+	models_info = ollama_client.list()
 	ollama_models = get_ollama_model_names(models_info)
 	return {"models": ollama_models}
 

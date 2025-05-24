@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-server
+    ports:
+      - '11434:11434'
+    volumes:
+      - ./ollama:/ollama
+      - ./ollama_entrypoint.sh:/ollama_entrypoint.sh
+    restart: always
+    entrypoint: ['/usr/bin/bash', 'ollama_entrypoint.sh']
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        progress: plain
+    container_name: pdf-backend
+    ports:
+      - '8000:8000'
+    environment:
+      - OLLAMA_SERVER_URL=http://ollama-server:11434
+      - VECTOR_DB_DIR=/app/vector_database
+      - UPLOADED_DOCS_DIR=/app/uploaded_docs
+    depends_on:
+      - ollama
+    restart: always
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: pdf-frontend
+    ports:
+      - '8501:8501'
+    environment:
+      - BACKEND_URL=http://pdf-backend:8000
+    depends_on:
+      - backend
+    restart: always

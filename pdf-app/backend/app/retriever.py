@@ -1,3 +1,5 @@
+import os
+
 from langchain.prompts import ChatPromptTemplate
 from langchain.prompts import PromptTemplate
 from langchain.retrievers.multi_query import MultiQueryRetriever
@@ -26,7 +28,10 @@ def process_question(question: str, selected_model: str) -> str:
 	)
 
 	# Initialize LLM
-	llm = ChatOllama(model=selected_model)
+	ollama_base_url = os.getenv(
+		"OLLAMA_SERVER_URL", "http://localhost:11434"
+	)
+	llm = ChatOllama(base_url=ollama_base_url, model=selected_model)
 
 	# Query prompt template
 	QUERY_PROMPT = PromptTemplate(

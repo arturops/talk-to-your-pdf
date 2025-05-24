@@ -8,6 +8,9 @@ from app.embedding_models import OllamaEmbeddingsService
 from .transform import load
 
 
+DEFAULT_EMBEDDING_MODEL = "nomic-embed-text:v1.5"
+
+
 class VectorDatabaseService:
 	async def store_file_content_in_db(
 		self,
@@ -18,7 +21,7 @@ class VectorDatabaseService:
 		logger.info(f"Inserting {filepath} content into vector database")
 		vectordb = None
 		ollama_embeddings = OllamaEmbeddingsService(
-			model_name="nomic-embed-text:latest"
+			model_name=DEFAULT_EMBEDDING_MODEL
 		)
 		async for chunk in load(filepath, chunk_size):
 			# logger.info(f"Inserting '{chunk[0:20]}...' into database")
@@ -39,7 +42,7 @@ class VectorDatabaseService:
 
 	def load_vector_db(self, collection_name: str = VECTOR_DB_DIR) -> FAISS:
 		ollama_embeddings = OllamaEmbeddingsService(
-			model_name="nomic-embed-text:latest"
+			model_name=DEFAULT_EMBEDDING_MODEL
 		)
 		# Load the vector database from disk
 		# faiss stores in pickle format, so allow the deserialization

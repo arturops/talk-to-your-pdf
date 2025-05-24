@@ -1,3 +1,4 @@
+import os
 from typing import Any
 from typing import List
 
@@ -6,6 +7,8 @@ import requests
 import streamlit as st
 from loguru import logger
 
+
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 
 # page setup
 st.set_page_config(
@@ -44,9 +47,9 @@ def clean_session():
 	"""
 	logger.info("Cleaning session state")
 	try:
-		res = requests.delete("http://localhost:8000/vectorDatabase")
+		res = requests.delete(f"{BACKEND_URL}/vectorDatabase")
 		res.raise_for_status()
-		res = requests.delete("http://localhost:8000/pdf")
+		res = requests.delete(f"{BACKEND_URL}/pdf")
 		res.raise_for_status()
 		for key in st.session_state.keys():
 			value = st.session_state.pop(key, None)
@@ -136,7 +139,7 @@ def main():
 	# list local models
 	models = tuple()
 	if st.session_state.get("pdf_pages"):
-		response = requests.get("http://localhost:8000/list/models")
+		response = requests.get(f"{BACKEND_URL}/list/models")
 		models = response.json()["models"]
 
 	if pdf_proccess_button:
@@ -145,7 +148,7 @@ def main():
 			files = {
 				"file": (file_uploaded.name, file_uploaded, file_uploaded.type)
 			}
-			response = requests.post("http://localhost:8000/upload", files=files)
+			response = requests.post(f"{BACKEND_URL}/upload", files=files)
 			st.write(response, response.text)
 			logger.info("Generating PDF embeddings and storing them in vdb")
 			st.session_state["vector_db_ready"] = True
@@ -202,7 +205,7 @@ def main():
 						if st.session_state["vector_db_ready"] is not None:
 							try:
 								response = requests.post(
-									"http://localhost:8000/question",
+									f"{BACKEND_URL}/question",
 									json={"prompt": prompt, "model": selected_model},
 								)
 								response.raise_for_status()

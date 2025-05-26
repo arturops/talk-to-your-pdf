@@ -14,8 +14,8 @@ from fastapi import status
 from loguru import logger
 from pydantic import BaseModel
 
-from app.constants import UPLOADED_DOCS_DIR
-from app.constants import VECTOR_DB_DIR
+from app.constants import DEFAULT_UPLOADED_DOCS_DIR
+from app.constants import DEFAULT_VECTOR_DB_DIR
 from app.retriever import process_question
 from app.upload import pdf_text_extractor
 from app.upload import save_file
@@ -31,7 +31,10 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 OLLAMA_SERVER_URL = os.getenv(
 	"OLLAMA_SERVER_URL", "http://localhost:11434"
 )
-
+VECTOR_DB_DIR = os.getenv("VECTOR_DB_DIR", DEFAULT_VECTOR_DB_DIR)
+UPLOADED_DOCS_DIR = os.getenv(
+	"UPLOADED_DOCS_DIR", DEFAULT_UPLOADED_DOCS_DIR
+)
 
 app = FastAPI()
 

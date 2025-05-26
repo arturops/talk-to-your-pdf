@@ -1,33 +1,40 @@
 #!/bin/bash
 
 # Start the Ollama server in background
-echo "🔴 $ ollama serve "
+echo "⏳ Starting Ollama server..."
 /bin/ollama serve &
 # record the PID of the server process
 OLLAMA_SERVE_PID=$!
 
-# Wait for the server to start
-# echo "🔴 Ollama serve..."
-# while ! curl -s http://localhost:11434/ > /dev/null; do
-#     sleep 1
-# done
+# Sync server PID and keep it running
+while ! /bin/ollama ls; do
+    echo "Waiting for Ollama server to start..."
+    sleep 2
+done
+echo "🟢 Ollama is up!"
 
-
-echo "🔴 Retrieving models from Ollama server..."
-ollama pull llama3.2:3b
-ollama pull gemma3:1b
-ollama pull nomic-embed-text:v1.5
+echo "⏳⏳ Pulling models ..."
+ollama pull nomic-embed-text:v1.5 &
+OLLAMA_EMBEDDING_PULL_PID=$!
+ollama pull llama3.2:3b &
+OLLAMA_CHAT_MODEL_PULL_PID=$!
+# not supported yet
+# ollama pull gemma3:1b
 # ollama pull deepseek-r1:1.5b-qwen-distill-q4_K_M
-echo "🟢 Done!"
 
-# Check if the server is running
-# if ps -p $OLLAMA_SERVE_PID > /dev/null; then
-#     echo "Ollama server is running with PID $OLLAMA_SERVE_PID"
-# else
-#     echo "Ollama server failed to start"
-#     exit 1
-# fi
+# Check if last model pulled successfully
+wait $OLLAMA_EMBEDDING_PULL_PID
+PULL_EMBEDDING_MODEL_STATUS=$?
+wait $OLLAMA_CHAT_MODEL_PULL_PID
+PULL_CHAT_MODEL_STATUS=$?
 
-# Wait for the Ollama server to be up and running
+# Check if the models were pulled successfully
+if [ $PULL_CHAT_MODEL_STATUS -ne 0 ] || [ $PULL_EMBEDDING_MODEL_STATUS -ne 0 ]; then
+    echo "❌ Failed to pull models."
+    exit 1
+fi
+echo "🟢 Done Pulling Models!"
+
+# Sync server PID and keep it running
 wait $OLLAMA_SERVE_PID
-echo "🟢 Ollama server is up!"
+echo "🟢 Ollama is up!"

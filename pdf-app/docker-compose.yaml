@@ -6,11 +6,21 @@ services:
     container_name: ollama-server
     ports:
       - '11434:11434'
+    environment:
+      - OLLAMA_CONTEXT_LENGTH=20480
     volumes:
-      - ./ollama:/ollama
+      - ./ollama:/root/.ollama
       - ./ollama_entrypoint.sh:/ollama_entrypoint.sh
     restart: always
     entrypoint: ['/usr/bin/bash', 'ollama_entrypoint.sh']
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 8G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
 
   backend:
     build:
@@ -39,5 +49,10 @@ services:
     environment:
       - BACKEND_URL=http://pdf-backend:8000
     depends_on:
-      - backend
+      backend:
+        condition: service_started
     restart: always
+
+volumes:
+  ollama:
+    driver: local

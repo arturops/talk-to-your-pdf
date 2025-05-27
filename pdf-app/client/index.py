@@ -152,7 +152,6 @@ def main():
 				"file": (file_uploaded.name, file_uploaded, file_uploaded.type)
 			}
 			response = requests.post(f"{BACKEND_URL}/upload", files=files)
-			st.write(response, response.text)
 			logger.info("Generating PDF embeddings and storing them in vdb")
 			st.session_state["vector_db_ready"] = True
 

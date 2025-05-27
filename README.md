@@ -2,11 +2,14 @@
 
 `🦮Tame Your PDF is AI an app` that helps you leverage `AI to retrieve information about a PDF, and chat with the AI about the PDF.` The best part is that your data never leaves your computer. 🦮**Tame Your PDF** lets you `stay private!` 🤫🤐
 
-## How to Use Demo 🎥🎬🍿
 
 > **Note for tech brains**
 >
 > 🦮**Tame Your PDF** is a local RAG system that retrieves information and helps answer questions about an uploaded PDF using open source LLMs. We use FastAPI to build a server that interacts with a streamlit UI and Ollama server. It all is containerized using docker, so that it can run in any system. Since the app runs locally in your computer, it never shares your data with any AI provider.
+
+## 🎬🍿 How to Use Demo 
+
+https://github.com/user-attachments/assets/91a4205d-4ae8-4577-9577-757438794c85
 
 ## 🔑 Prerequisites
 
@@ -48,7 +51,7 @@ Welcome and enjoy it!!!
 
 The alternative way to start the app is by using your own `Ollama`.
 
-> **NOTE:** We assume you run your Ollama on MacOS and we connect to `http://host.docker.internal:11434`. If that is not the case you can configure where to connect to `Ollama`, check the [Optional Setup](#optional-setup) section.
+> **NOTE:** We assume you run your Ollama on MacOS and we connect to `http://host.docker.internal:11434`. If that is not the case you can configure where to connect to `Ollama`, check the [Optional Setup](#-optional-setup) section.
 
 In order to start the app `without Ollama` simply go to the root directory of the repo and type:
 
@@ -62,6 +65,7 @@ You should be able to open the UI if you go to your browser and type:
 
 Welcome and enjoy it!!!
 
+## 🎁 🎁
 ## Optional Setup
 
 This section is only to describe some optional setup for more advanced users.
@@ -98,7 +102,7 @@ However, if you have your `Ollama server` in a different `HOST_IP` or `HOST_PORT
 
 That will get the app to know where to send requests to your `Ollama server` and things should work. Except you now are using your own hardware to run models! 📲🐳🦙⭐️
 
-## Future Work - Improvements 🔬📝
+## 🔬📝 Future Work - Improvements
 
 - [ ] Zoom into the pdf
 - [ ] Selection of embedding model

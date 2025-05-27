@@ -111,3 +111,13 @@ That will get the app to know where to send requests to your `Ollama server` and
 - [ ] Visualize embeddings of PDF chunks
 
 ... suggestions welcome! 🆘📝🙏
+
+## 🏅Credits and Thanks
+
+- Thanks to Alireza Parandeh's book[Building Generative AI Services with FastAPI](https://learning.oreilly.com/library/view/building-generative-ai) to help me understand how to make async tasks and leverage FastAPI on LLM apps.
+
+- Thanks to [tonykipkemboi](https://github.com/tonykipkemboi/ollama_pdf_rag) for the inspiration and some of the RAG and UI code to get started.
+
+- This app was also based in [arturops](https://github.com/arturops/ai-notebooks/blob/main/pdf-rag/local_pdf_rag.ipynb) rag notebook.
+
+- Finally, thanks to all open source community: Ollama, MetaAI, Langchain, FastAPI, Streamlit, and more!

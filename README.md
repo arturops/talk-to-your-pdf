@@ -16,7 +16,7 @@ https://github.com/user-attachments/assets/91a4205d-4ae8-4577-9577-757438794c85
 The minimum requirements are:
 
 - 🐳 Docker
-- 🐳📝 Docker compose
+- 🐙 Docker compose
 - 🛜 Internet connection to install for the first time!
 
 > You can install [docker desktop](https://docs.docker.com/desktop/) and that will include docker and docker compose.
@@ -118,7 +118,7 @@ That will get the app to know where to send requests to your `Ollama server` and
 
 ## 🏅Credits and Thanks
 
-- Thanks to Alireza Parandeh's book[Building Generative AI Services with FastAPI](https://learning.oreilly.com/library/view/building-generative-ai) to help me understand how to make async tasks and leverage FastAPI on LLM apps.
+- Thanks to Alireza Parandeh's book [Building Generative AI Services with FastAPI](https://learning.oreilly.com/library/view/building-generative-ai) to help me understand how to make async tasks and leverage FastAPI on LLM apps.
 
 - Thanks to [tonykipkemboi](https://github.com/tonykipkemboi/ollama_pdf_rag) for the inspiration and some of the RAG and UI code to get started.
 

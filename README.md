@@ -1,18 +1,28 @@
-# Getting Started with "🦮Tame Your PDF"
+# 🦮Tame Your PDF
 
-## Prerequisites
+`🦮Tame Your PDF is AI an app` that helps you leverage `AI to retrieve information about a PDF, and chat with the AI about the PDF.` The best part is that your data never leaves your computer. 🦮**Tame Your PDF** lets you `stay private!` 🤫🤐
+
+## How to Use Demo 🎥🎬🍿
+
+> **Note for tech brains**
+>
+> 🦮**Tame Your PDF** is a local RAG system that retrieves information and helps answer questions about an uploaded PDF using open source LLMs. We use FastAPI to build a server that interacts with a streamlit UI and Ollama server. It all is containerized using docker, so that it can run in any system. Since the app runs locally in your computer, it never shares your data with any AI provider.
+
+## 🔑 Prerequisites
 
 The minimum requirements are:
 
 - 🐳 Docker
 - 🐳📝 Docker compose
-- Internet connection to install for the first time!
+- 🛜 Internet connection to install for the first time!
 
-However, if you are more tech savy and want to get advantage of your MacOS, Linux or Windows machine GPU.. install `Ollama` separately and run it locally or host it somewhere else you can access it.
+> You can install [docker desktop](https://docs.docker.com/desktop/) and that will include docker and docker compose.
+
+If you are more tech savy and want to get advantage of your MacOS, Linux or Windows machine GPU.. install `Ollama` separately and run it locally or host it somewhere else you can access it.
 
 > Ollama version supported is 0.7.0
 
-## Getting Started 🏎️
+## 🚀 Getting Started 🏎️
 
 First clone this repo ⭐️
 

@@ -1,6 +1,6 @@
 # 🦮Tame Your PDF
 
-`🦮Tame Your PDF is AI an app` that helps you leverage `AI to retrieve information about a PDF, and chat with the AI about the PDF.` The best part is that your data never leaves your computer. 🦮**Tame Your PDF** lets you `stay private!` 🤫🤐
+`🦮Tame Your PDF is an AI app` that helps you leverage `AI to retrieve information about a PDF, and chat with the AI about the PDF.` The best part is that your data never leaves your computer. 🦮**Tame Your PDF** lets you `stay private!` 🤫🤐
 
 
 > **Note for tech brains**
@@ -21,7 +21,7 @@ The minimum requirements are:
 
 > You can install [docker desktop](https://docs.docker.com/desktop/) and that will include docker and docker compose.
 
-If you are more tech savy and want to get advantage of your MacOS, Linux or Windows machine GPU.. install `Ollama` separately and run it locally or host it somewhere else you can access it.
+If you are more tech savy and want to get advantage of your MacOS, Linux or Windows machine GPU... install `Ollama` separately and run it locally or host it somewhere else you can access it.
 
 > Ollama version supported is 0.7.0
 

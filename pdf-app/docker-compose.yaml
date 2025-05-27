@@ -9,7 +9,7 @@ services:
     environment:
       - OLLAMA_CONTEXT_LENGTH=20480
     volumes:
-      - ./ollama:/root/.ollama
+      - ./ollama_setup:/root/.ollama
       - ./ollama_entrypoint.sh:/ollama_entrypoint.sh
     restart: always
     entrypoint: ['/usr/bin/bash', 'ollama_entrypoint.sh']

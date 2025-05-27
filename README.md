@@ -118,6 +118,6 @@ That will get the app to know where to send requests to your `Ollama server` and
 
 - Thanks to [tonykipkemboi](https://github.com/tonykipkemboi/ollama_pdf_rag) for the inspiration and some of the RAG and UI code to get started.
 
-- This app was also based in [arturops](https://github.com/arturops/ai-notebooks/blob/main/pdf-rag/local_pdf_rag.ipynb) rag notebook.
-
 - Finally, thanks to all open source community: Ollama, MetaAI, Langchain, FastAPI, Streamlit, and more!
+
+> For a simpler notebook version of this app, check my [rag notebook](https://github.com/arturops/ai-notebooks/blob/main/pdf-rag/local_pdf_rag.ipynb).

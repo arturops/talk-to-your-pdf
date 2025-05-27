@@ -1,11 +1,17 @@
+import os
+
 from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
 from loguru import logger
 
-from app.constants import VECTOR_DB_DIR
+from app.constants import DEFAULT_EMBEDDING_MODEL
+from app.constants import DEFAULT_VECTOR_DB_DIR
 from app.embedding_models import OllamaEmbeddingsService
 
 from .transform import load
+
+
+VECTOR_DB_DIR = os.getenv("VECTOR_DB_DIR", DEFAULT_VECTOR_DB_DIR)
 
 
 class VectorDatabaseService:
@@ -15,10 +21,10 @@ class VectorDatabaseService:
 		chunk_size: int = 8000,
 		collection_name: str = VECTOR_DB_DIR,
 	) -> None:
-		logger.info(f"Inserting {filepath} content into vector database")
+		logger.info(f"Inserting '{filepath}' content into vector database")
 		vectordb = None
 		ollama_embeddings = OllamaEmbeddingsService(
-			model_name="nomic-embed-text:latest"
+			model_name=DEFAULT_EMBEDDING_MODEL
 		)
 		async for chunk in load(filepath, chunk_size):
 			# logger.info(f"Inserting '{chunk[0:20]}...' into database")
@@ -39,7 +45,7 @@ class VectorDatabaseService:
 
 	def load_vector_db(self, collection_name: str = VECTOR_DB_DIR) -> FAISS:
 		ollama_embeddings = OllamaEmbeddingsService(
-			model_name="nomic-embed-text:latest"
+			model_name=DEFAULT_EMBEDDING_MODEL
 		)
 		# Load the vector database from disk
 		# faiss stores in pickle format, so allow the deserialization
@@ -48,5 +54,5 @@ class VectorDatabaseService:
 			ollama_embeddings.model,
 			allow_dangerous_deserialization=True,
 		)
-		logger.info(f"Loaded {collection_name} from disk")
+		logger.info(f"Loaded vector db: '{collection_name}' from disk")
 		return loaded_vectordb

@@ -7,7 +7,12 @@ from fastapi import UploadFile
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from app.constants import DEFAULT_DIGEST_PDF_CHUNK_SIZE
-from app.constants import UPLOADED_DOCS_DIR
+from app.constants import DEFAULT_UPLOADED_DOCS_DIR
+
+
+UPLOADED_DOCS_DIR = os.getenv(
+	"UPLOADED_DOCS_DIR", DEFAULT_UPLOADED_DOCS_DIR
+)
 
 
 async def save_file(
